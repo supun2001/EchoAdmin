@@ -1,0 +1,91 @@
+{
+    "type": "Settings",
+    "audio": {
+        "input": {
+            "encoding": "mulaw",
+            "sample_rate": 8000
+        },
+        "output": {
+            "encoding": "mulaw",
+            "sample_rate": 8000,
+            "container": "none"
+        }
+    },
+    "agent": {
+        "language": "en",
+        "listen": {
+            "provider": {
+                "type": "deepgram",
+                "model": "nova-3",
+                "keyterms": ["hello", "goodbye"]
+            }
+        },
+        "think": {
+            "provider": {
+                "type": "open_ai",
+                "model": "gpt-4o-mini",
+                "temperature": 0.7
+            },
+            "prompt": "You are a professional administrator assistant. When saying price you pound(£). Never use the word 'drug' — always say 'course'. Speak naturally and conversationally. Never use or say asterisks. Do NOT use Markdown formatting, bold, italics, or headings. Do NOT say or read the characters *, **, underscore, or backticks out loud. Speak only in plain text. Do not use labels like Description:, Course Name:, Phone Number: or any formal headings. Do not create structured bullet points unless the user asks. Speak normally instead, like: This course teaches... or Your phone number is... Never say or read variable names such as course_name, customer_email, customer_phone, or order_id. Always ask the user to spell out unclear email or phone numbers. Confirm details in simple, human, friendly language. Keep responses short and conversational — avoid robotic or formal formatting.",
+            "functions": [
+                {
+                    "name": "get_course_info",
+                    "description": "Retrieve detailed information about a specific course. Use this function when: A customer asks about course content, pricing, or availability. A customer wants to know what a course teaches. A user says 'Tell me about this course'. Always provide clear information about the course name, description, price, and quantity.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "course_name": {
+                                "type": "string",
+                                "description": "Name of the course to look up. Convert to lowercase when matching. Example: 'macset', 'digital_admin', 'leadership_program'"
+                            }
+                        },
+                        "required": ["course_name"]
+                    }
+                },
+                {
+                    "name": "place_order",
+                    "description": "Place a new course enrollment order. Use this function when: A user wants to enroll in a course, requests course registration, or asks to proceed with an order. Each course has a predefined quantity included automatically. Before placing an order: Verify the course exists using get_course_info. Always confirm customer email, phone number, and course selection before processing.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "customer_email": {
+                                "type": "string",
+                                "description": "Customer's email for the course order. Must be confirmed clearly."
+                            },
+                            "customer_phone": {
+                                "type": "string",
+                                "description": "Customer's phone number for the order. Must be confirmed clearly."
+                            },
+                            "course_name": {
+                                "type": "string",
+                                "description": "Name of the course being ordered. Convert to lowercase for matching. Must be a valid course in the system."
+                            }
+                        },
+                        "required": ["customer_email", "customer_phone", "course_name"]
+                    }
+                },
+                {
+                    "name": "lookup_order",
+                    "description": "Look up an existing course order by its ID. Use this function when: A customer wants to check order status, track an order, or verify purchase details. Always confirm the order exists and return detailed order information.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "order_id": {
+                                "type": "integer",
+                                "description": "The order ID to look up. Must be a valid order number."
+                            }
+                        },
+                        "required": ["order_id"]
+                    }
+                }
+            ]
+        },
+        "speak": {
+            "provider": {
+                "type": "deepgram",
+                "model": "aura-2-thalia-en"
+            }
+        },
+        "greeting": "Hello! I'm Sara. I can help you with course information, placing course orders, and checking order status. When placing an order, I'll need your email and phone number clearly spelled out, and I will confirm all details with you. How can I assist you today?"
+    }
+}
